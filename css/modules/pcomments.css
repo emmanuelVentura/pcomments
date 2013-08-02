@@ -1,0 +1,41 @@
+/*
+ Feuille de style du module commentaires (pcomments).
+ Téléchargez modèle, module et rangée sur
+ http://www.automne4you.com 
+
+ .pcomments				:	Bloc contenant l'affichage du module.
+ .pcomments-addcomment			:	Lien affichant le formulaire de soumission.
+ .pcomments-form			:	formulaire de soumission.
+ .pcomments-filled			:	Message de confirmation de soumission.
+ .pcomments-malformed			:	Message d'erreur de format lors de soumission.
+ .pcomments-required			:	Message d'alerte de champ manquant lors de soumission.
+ .pcomments-submit			:	Bouton submit du formulaire de soumissio,.
+ .pcomments-results			:	Bloc contenant tous les résultats affichés.
+ .pcomments-totalresults		:	Bloc affichant le nombre de résultats.
+ .pcomments-result			:	Bloc par résultat.
+ .pcomments-avatar			:	Bloc affichant l'avatar.
+ .pcomments-author			:	Bloc affichant le nom.
+ .pcomments-date			:	Bloc affichant la date.
+ .pcomments-comment			:	Bloc affichant le commentaire.
+ .pcomments-moderate			:	Bloc affichant le message de modération à la place du commentaire.
+ 
+*/
+ .pcomments{}
+ .pcomments-addcomment{}
+ .pcomments-form{}
+ .pcomments-filled{}
+ .pcomments-malformed{}
+ .pcomments-required{}
+ .pcomments-submit{}
+ .pcomments-results{}
+ .pcomments-totalresults{}
+ .pcomments-result{
+	clear:both;
+ }
+ .pcomments-avatar{
+	float:left;
+ }
+ .pcomments-author{}
+ .pcomments-date{}
+ .pcomments-comment{}
+ .pcomments-moderate{}

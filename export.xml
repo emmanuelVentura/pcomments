@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<export>
+  <version><![CDATA[4.2.1]]></version>
+  <language><![CDATA[fr]]></language>
+  <description><![CDATA[Une rangée permet aux utilisateurs de laisser un commentaire sur n'importe quelle page, de votre site.
+Elle affiche en entête le formulaire d'enregistrement des commentaires, puis viennent les commentaires ordonnés par date de création.
+
+Les commentaires sont affichés en fonction de l'url de la page et de ses paramètres.
+Vous pouvez exclure la prise en compte de certains paramètres dans les options du module.
+
+Ces options vous permettent également d'activer le service Gravatar (http://www.gravatar.com/)
+
+Les commentaires peuvent être modéré a postériori.
+
+Aucune librairie javascript complémentaire n'est necessaire pour ce module.]]></description>
+  <modules>
+    <value key="0">
+      <codename><![CDATA[pcomments]]></codename>
+      <polymod>1</polymod>
+      <labels>
+        <en><![CDATA[Comments]]></en>
+        <fr><![CDATA[Commentaires]]></fr>
+      </labels>
+      <parameters>
+        <Use_Gravatar>
+          <value key="0">0</value>
+          <value key="1"><![CDATA[boolean]]></value>
+        </Use_Gravatar>
+        <Default_avatar>
+          <value key="0"><![CDATA[http://www.automne4you.com/img/atm4u/homestar.gif]]></value>
+          <value key="1"><![CDATA[text]]></value>
+        </Default_avatar>
+        <Avatar_size>
+          <value key="0">140</value>
+          <value key="1"><![CDATA[number]]></value>
+        </Avatar_size>
+        <Ignore_queries>
+          <value key="0"><![CDATA[page,submit]]></value>
+          <value key="1"><![CDATA[text]]></value>
+        </Ignore_queries>
+      </parameters>
+      <rows>
+        <value key="0">
+          <id>83</id>
+          <uuid><![CDATA[d5ac8242-9500-11e0-a15f-e922ea323c96]]></uuid>
+          <label><![CDATA[Commentaires : liste et formulaire]]></label>
+          <definition><![CDATA[<row>
+	<!--
+	Rangée du module Commentaires (pcomments).
+	Téléchargez modèle, module et rangée sur
+	http://www.automne4you.com 
+
+	Affiche en entête le formulaire d'enregistrement des commentaires.
+	Puis viennent les commentaires ordonnés par date de création.
+
+	Les commentaires sont affichés en fonction de l'url de la page et de ses paramètres.
+	Vous pouvez exclure la prise en compte de certains paramètres dans les options du module.
+	
+	Ces options vous permettent également d'activer le service Gravatar (http://www.gravatar.com/)
+	
+	-->
+	
+	<block module="pcomments" id="comment" cache="0">
+		<?php
+			// Get module's parameters
+			$pcomments_module = CMS_modulesCatalog::getByCodename('pcomments');
+			$param_ignoreQueries=$pcomments_module->getParameters('Ignore_queries');
+			$param_useGravatar=$pcomments_module->getParameters('Use_Gravatar');
+			$param_defaultAvatar=$pcomments_module->getParameters('Default_avatar');
+			$param_siveAvatar=$pcomments_module->getParameters('Avatar_size');
+		?>
+		<div class="pcomments">
+			<a name="addcomment" class="pcomments-addcomment">Laissez un commentaire</a>
+			<div class="pcomments-form">
+				<atm-form what="{Commentaire}" name="formComment" action="{page:self:url}#addcomment">
+					<atm-if what="{Commentaire:Query:value}" name="forQuery">
+						<atm-setvar vartype="var" varname="pcommentQuery" value="{Commentaire:Query:value}" />
+					</atm-if>
+					<atm-else for="forQuery">
+						<?php
+							if(isset($_SERVER['QUERY_STRING'])){
+								$ignoreVars=explode(',', $param_ignoreQueries);
+								parse_str($_SERVER['QUERY_STRING'], $pcommentQuery);
+								foreach ($ignoreVars as &$value) {
+									if (isset($pcommentQuery[$value])) {
+										unset($pcommentQuery[$value]);
+									}
+								}
+								$pcommentQuery=http_build_query($pcommentQuery);
+							}else{
+								$pcommentQuery="";
+							}
+						?>
+					</atm-else>
+					<atm-if what="{filled}">
+						<div class="pcomments-filled">Votre message a bien été ajouté !</div>
+					</atm-if>
+					<atm-if what="!{filled}">
+						<atm-if what="{error}">
+							<div class="pcomments-error">
+								Une erreur est survenue durant l'enregistrement de votre message ...<br />
+								Veuillez réessayer.
+							</div>
+						</atm-if>
+						<atm-if what="{malformed}">
+							<div class="pcomments-malformed">
+								Les champs suivants ne sont pas corrects :
+								<ul>
+									<atm-form-malformed form="formComment">
+										<li>{malformedname}</li> 
+									</atm-form-malformed>
+								</ul>
+							</div>
+						</atm-if>
+						<atm-if what="{required}">
+							<div class="pcomments-required">
+								Les champs suivants sont requis :
+								<ul>
+									<atm-form-required form="formComment">
+										<li>{requiredname}</li>
+									</atm-form-required>
+								</ul>
+							</div>
+						</atm-if>
+						<label for="pfaq-{Commentaire:Nom:fieldID}">{Commentaire:Nom:fieldname} : </label>
+						<atm-input field="{Commentaire:Nom}" form="formComment" id="pfaq-{Commentaire:Nom:fieldID}"/>
+						<label for="pfaq-{Commentaire:Email:fieldID}">{Commentaire:Email:fieldname} : </label>
+						<atm-input field="{Commentaire:Email}" form="formComment" id="pfaq-{Commentaire:Email:fieldID}" />
+						<br />
+						<label for="pfaq-{Commentaire:Commentaire:fieldID}">{Commentaire:Commentaire:fieldname} : </label>
+						<atm-input field="{Commentaire:Commentaire}" form="formComment" id="pfaq-{Commentaire:Commentaire:fieldID}" />
+						<atm-input field="{Commentaire:Page}" form="formComment" hidden="1" id="pfaq-{Commentaire:Page:fieldID}" value="{page:self:id}"/>
+						<atm-input field="{Commentaire:Query}" form="formComment" hidden="1" id="pfaq-{Commentaire:Query:fieldID}" value="{var:string:pcommentQuery}"/>
+						<atm-input field="{Commentaire:IP}" form="formComment" hidden="1" id="pfaq-{Commentaire:IP:fieldID}" value="{server:string:REMOTE_ADDR}"/>
+						<input type="submit" class="submit pcomments-submit" value="Laisser votre commentaire" />
+					</atm-if>
+				</atm-form>
+			</div>
+		</div>
+		<div class="pcomments">
+			<atm-xml what="{request:string:out} == 'xml'">
+				<atm-search what="{Commentaire}" name="commentsResults">
+					<atm-search-param search="commentsResults" type="{Commentaire:Page:fieldID}" value="{page:self:id}" mandatory="true" />
+					<atm-if what="{var:string:pcommentQuery}" name="query">
+						<atm-search-param search="commentsResults" type="{Commentaire:Query:fieldID}" value="{var:string:pcommentQuery}" operator="=" mandatory="true" />
+					</atm-if>
+					<atm-else for="query">
+						<atm-search-param search="commentsResults" type="{Commentaire:Query:fieldID}" value="" operator="=" mandatory="true" />
+					</atm-else>
+					<atm-search-page search="commentsResults" value="{request:int:page}" />
+					<atm-search-order search="commentsResults" type="{Commentaire:Date_de_creation:fieldID}" direction="desc" />
+					<atm-result search="commentsResults">
+						<atm-if what="{firstresult}">
+							<atm-start-tag tag="div" class="pcomments-results" />
+							<atm-if what="{maxresults}>1" name="total_results">
+								<a name="comments" class="pcomments-totalresults">{maxresults} commentaires</a>
+							</atm-if>
+							<atm-else for="total_results">
+								<a name="comments" class="pcomments-totalresults">{maxresults} commentaire</a>
+							</atm-else>
+							<atm-start-tag tag="div" />
+						</atm-if>
+						<div class="pcomments-result">
+							<?php
+								if($param_useGravatar){
+									$grav_url = "http://www.gravatar.com/avatar/" . md5( strtolower( trim( {Commentaire:Email:value} ) ) ) . "?d=" . urlencode( $param_defaultAvatar ) . "&s=" . $param_siveAvatar;
+									$content.='<div class="pcomments-avatar"><img src="'.$grav_url.'" alt="" /></div>';
+								}
+							?>
+							<span class="pcomments-author">{Commentaire:Nom:label}</span> 
+							<span class="pcomments-date">({Commentaire:Date_de_creation:formatedValue|d/m/Y})</span>					
+							<atm-if what="{Commentaire:Modere:value}!=1">
+								<p class="pcomments-comment">{Commentaire:Commentaire:htmlvalue}</p>
+							</atm-if>
+							<atm-if what="{Commentaire:Modere:value}==1">
+								<p class="pcomments-moderate">Commentaire modéré</p>
+							</atm-if>
+						</div>
+						<atm-if what="{lastresult}">
+							<atm-end-tag tag="div" />
+							<atm-end-tag tag="div" />
+						</atm-if>
+					</atm-result>
+				</atm-search>
+			</atm-xml>
+		</div>
+	</block>
+</row>]]></definition>
+          <module><![CDATA[pcomments]]></module>
+          <groups/>
+          <useable>1</useable>
+          <description/>
+          <image><![CDATA[/automne/templates/rows/images/comments.gif]]></image>
+        </value>
+      </rows>
+      <js/>
+      <css/>
+      <objects>
+        <value key="0">
+          <id>7</id>
+          <uuid><![CDATA[a23d88a0-94e9-11e0-a15f-e922ea323c96]]></uuid>
+          <labels>
+            <en><![CDATA[Comment]]></en>
+            <fr><![CDATA[Commentaire]]></fr>
+          </labels>
+          <descriptions>
+            <en/>
+            <fr><![CDATA[ ]]></fr>
+          </descriptions>
+          <params>
+            <resourceUsage>0</resourceUsage>
+            <admineditable>0</admineditable>
+            <composedLabel/>
+            <previewURL/>
+            <indexable>0</indexable>
+            <multilanguage>0</multilanguage>
+            <indexURL/>
+            <resultsDefinition/>
+          </params>
+          <fields>
+            <value key="0">
+              <id>51</id>
+              <uuid><![CDATA[ecd04e10-91d3-11e1-ad75-21c370e83a6b]]></uuid>
+              <labels>
+                <en><![CDATA[Moderate]]></en>
+                <fr><![CDATA[Modéré]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_boolean]]></type>
+              <multi>0</multi>
+              <params>
+                <order>6</order>
+                <required>0</required>
+                <indexable>0</indexable>
+                <searchlist>1</searchlist>
+                <searchable>1</searchable>
+                <params/>
+              </params>
+            </value>
+            <value key="1">
+              <id>29</id>
+              <uuid><![CDATA[f2e2fbc8-94e9-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <fr><![CDATA[Date de création]]></fr>
+                <en><![CDATA[Creation date]]></en>
+              </labels>
+              <descriptions>
+                <en/>
+                <fr><![CDATA[ ]]></fr>
+              </descriptions>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_date]]></type>
+              <multi>0</multi>
+              <params>
+                <order>7</order>
+                <required>1</required>
+                <indexable>0</indexable>
+                <searchlist>0</searchlist>
+                <searchable>0</searchable>
+                <params>
+                  <setNow>1</setNow>
+                  <withHMS>1</withHMS>
+                  <creationDate>1</creationDate>
+                  <updateDate>0</updateDate>
+                  <moveDate/>
+                </params>
+              </params>
+            </value>
+            <value key="2">
+              <id>33</id>
+              <uuid><![CDATA[6bb1f5ea-94ea-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <en><![CDATA[Page]]></en>
+                <fr><![CDATA[Page]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_page]]></type>
+              <multi>0</multi>
+              <params>
+                <order>4</order>
+                <required>1</required>
+                <indexable>0</indexable>
+                <searchlist>0</searchlist>
+                <searchable>1</searchable>
+                <params/>
+              </params>
+            </value>
+            <value key="3">
+              <id>30</id>
+              <uuid><![CDATA[06e13504-94ea-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <fr><![CDATA[Nom]]></fr>
+                <en><![CDATA[Name]]></en>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_string]]></type>
+              <multi>0</multi>
+              <params>
+                <order>1</order>
+                <required>1</required>
+                <indexable>0</indexable>
+                <searchlist>0</searchlist>
+                <searchable>1</searchable>
+                <params>
+                  <maxLength>255</maxLength>
+                  <isEmail>0</isEmail>
+                  <matchExp/>
+                </params>
+              </params>
+            </value>
+            <value key="4">
+              <id>31</id>
+              <uuid><![CDATA[21fe6906-94ea-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <en><![CDATA[Email]]></en>
+                <fr><![CDATA[Email]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_string]]></type>
+              <multi>0</multi>
+              <params>
+                <order>2</order>
+                <required>1</required>
+                <indexable>0</indexable>
+                <searchlist>1</searchlist>
+                <searchable>1</searchable>
+                <params>
+                  <maxLength>255</maxLength>
+                  <isEmail>1</isEmail>
+                  <matchExp/>
+                </params>
+              </params>
+            </value>
+            <value key="5">
+              <id>35</id>
+              <uuid><![CDATA[65aded80-9507-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <en><![CDATA[IP]]></en>
+                <fr><![CDATA[IP]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_string]]></type>
+              <multi>0</multi>
+              <params>
+                <order>8</order>
+                <required>0</required>
+                <indexable>0</indexable>
+                <searchlist>0</searchlist>
+                <searchable>0</searchable>
+                <params>
+                  <maxLength>255</maxLength>
+                  <isEmail>0</isEmail>
+                  <matchExp/>
+                </params>
+              </params>
+            </value>
+            <value key="6">
+              <id>36</id>
+              <uuid><![CDATA[d0560578-9507-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <en><![CDATA[Query]]></en>
+                <fr><![CDATA[Query]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_string]]></type>
+              <multi>0</multi>
+              <params>
+                <order>5</order>
+                <required>0</required>
+                <indexable>0</indexable>
+                <searchlist>0</searchlist>
+                <searchable>0</searchable>
+                <params>
+                  <maxLength>255</maxLength>
+                  <isEmail>0</isEmail>
+                  <matchExp/>
+                </params>
+              </params>
+            </value>
+            <value key="7">
+              <id>32</id>
+              <uuid><![CDATA[3e17c6fa-94ea-11e0-a15f-e922ea323c96]]></uuid>
+              <labels>
+                <en><![CDATA[Comment]]></en>
+                <fr><![CDATA[Commentaire]]></fr>
+              </labels>
+              <descriptions/>
+              <objectID>7</objectID>
+              <type><![CDATA[CMS_object_text]]></type>
+              <multi>0</multi>
+              <params>
+                <order>3</order>
+                <required>1</required>
+                <indexable>0</indexable>
+                <searchlist>1</searchlist>
+                <searchable>1</searchable>
+                <params>
+                  <html>0</html>
+                  <toolbar><![CDATA[BasicLink]]></toolbar>
+                  <toolbarWidth><![CDATA[100%]]></toolbarWidth>
+                  <toolbarHeight>200</toolbarHeight>
+                </params>
+              </params>
+            </value>
+          </fields>
+        </value>
+      </objects>
+      <files>
+        <value key="0"><![CDATA[/automne/templates/rows/images/comments.gif]]></value>
+        <value key="1"><![CDATA[/css/modules/pcomments.css]]></value>
+      </files>
+    </value>
+  </modules>
+</export>
