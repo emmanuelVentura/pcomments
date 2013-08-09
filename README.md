@@ -22,7 +22,7 @@ Le module est compatible Automne 4.2.1
 
 ##Pré-requis
 
-Les droits côtés client doivent être activé pour permettre l'enregistrement dans le module.
+Les droits côté client doivent être activés pour permettre l'enregistrement dans le module.
 Pour en savoir plus : http://www.automne4you.com/web/72-tutoriel-gestion-des-droits-cote-client-comment-et-pourquoi-activer-la-verification-des-droits.php
 
 ##Installation du module
